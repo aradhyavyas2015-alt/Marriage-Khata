@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Shaadi Khata — Wedding Expense Ledger</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5A0F27">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shaadi Khata">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FBF6EC;
+    --paper:#FFFDF8;
+    --ink:#3A0D1C;
+    --maroon:#7A1735;
+    --maroon-deep:#5A0F27;
+    --gold:#C68A2E;
+    --gold-light:#EFD9AA;
+    --jade:#2F5D50;
+    --jade-light:#DCE9E4;
+    --taupe:#8B7355;
+    --border:#E8DCC8;
+    --danger:#B23A2E;
+    --shadow: 0 1px 2px rgba(58,13,28,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Manrope',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    padding:0 0 5rem;
+    min-height:100vh;
+    background:var(--ivory);
+    position:relative;
+  }
+
+  /* ---------- Header ---------- */
+  .header{
+    padding:2rem 1.25rem 1.25rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .motif{
+    width:100%;
+    height:14px;
+    display:block;
+    margin-bottom:1.1rem;
+    opacity:0.55;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:700;
+    margin:0 0 0.3rem;
+  }
+  h1.title{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size:34px;
+    line-height:1.05;
+    margin:0 0 0.35rem;
+    color:var(--maroon-deep);
+  }
+  .subtitle{
+    font-size:14px;
+    color:var(--taupe);
+    margin:0;
+  }
+
+  /* ---------- Summary ledger stub ---------- */
+  .summary{
+    margin:1.25rem 1.25rem 0;
+    background:var(--maroon-deep);
+    border-radius:16px;
+    padding:1.25rem 1.35rem 1.35rem;
+    color:var(--ivory);
+    position:relative;
+  }
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:0.5rem;
+  }
+  .summary-label{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    margin:0 0 0.25rem;
+    font-weight:700;
+  }
+  .summary-amount{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:32px;
+    line-height:1;
+    letter-spacing:-0.01em;
+  }
+  .summary-count{
+    font-size:12.5px;
+    color:#E9D6C9;
+    text-align:right;
+  }
+  .budget-wrap{
+    margin-top:0.9rem;
+  }
+  .budget-track{
+    height:6px;
+    border-radius:99px;
+    background:rgba(255,255,255,0.16);
+    overflow:hidden;
+    margin-top:0.4rem;
+  }
+  .budget-fill{
+    height:100%;
+    background:var(--gold);
+    border-radius:99px;
+    transition:width 0.3s ease;
+  }
+  .budget-fill.over{ background:#E0806F; }
+  .budget-text{
+    font-size:11.5px;
+    color:#E9D6C9;
+    display:flex;
+    justify-content:space-between;
+    margin-top:0.35rem;
+  }
+  .set-budget-btn{
+    background:none;
+    border:none;
+    color:var(--gold-light);
+    font-size:12px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    padding:0;
+    cursor:pointer;
+    font-family:'Manrope',sans-serif;
+  }
+
+  /* ---------- Section ---------- */
+  .section{
+    margin:1.6rem 1.25rem 0;
+  }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:0.65rem;
+  }
+  .section-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--ink);
+    margin:0;
+  }
+  .section-link{
+    font-size:12.5px;
+    color:var(--maroon);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Manrope',sans-serif;
+    font-weight:600;
+    padding:0;
+  }
+
+  /* ---------- Add form card ---------- */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.1rem 1.1rem 1.2rem;
+    box-shadow:var(--shadow);
+  }
+  .field{ margin-bottom:0.85rem; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    color:var(--taupe);
+    text-transform:uppercase;
+    margin-bottom:0.35rem;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    font-family:'Manrope',sans-serif;
+    font-size:15px;
+    padding:0.62rem 0.7rem;
+    border-radius:9px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--maroon);
+    box-shadow:0 0 0 3px rgba(122,23,53,0.09);
+  }
+  .row2{ display:flex; gap:0.7rem; }
+  .row2 .field{ flex:1; min-width:0; }
+  .amount-field{ position:relative; }
+  .amount-field .rupee{
+    position:absolute;
+    left:0.7rem;
+    top:38px;
+    font-size:15px;
+    color:var(--taupe);
+    pointer-events:none;
+  }
+  .amount-field input{ padding-left:1.5rem; }
+
+  .btn{
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    border-radius:9px;
+    padding:0.68rem 1rem;
+    border:none;
+    cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{ background:var(--maroon); color:#fff; width:100%; margin-top:0.3rem; }
+  .btn-primary:active{ background:var(--maroon-deep); }
+  .btn-secondary{
+    background:transparent;
+    color:var(--maroon);
+    border:1px solid var(--border);
+    width:100%;
+  }
+  .form-actions{ display:flex; gap:0.6rem; margin-top:0.9rem; }
+  .form-actions .btn{ margin-top:0; }
+
+  .add-toggle{
+    width:100%;
+    background:var(--maroon);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:0.9rem 1rem;
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.4rem;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  .add-toggle:active{ background:var(--maroon-deep); }
+  .plus{ font-size:18px; line-height:1; }
+
+  /* ---------- Event pills ---------- */
+  .pill-scroll{
+    display:flex;
+    gap:0.5rem;
+    overflow-x:auto;
+    padding-bottom:0.15rem;
+    scrollbar-width:none;
+  }
+  .pill-scroll::-webkit-scrollbar{ display:none; }
+  .pill{
+    flex:0 0 auto;
+    padding:0.45rem 0.85rem;
+    border-radius:99px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pill.active{
+    background:var(--maroon);
+    border-color:var(--maroon);
+    color:#fff;
+  }
+
+  /* ---------- Breakdown bars ---------- */
+  .bar-list{ display:flex; flex-direction:column; gap:0.7rem; }
+  .bar-item{ cursor:pointer; }
+  .bar-top{
+    display:flex;
+    justify-content:space-between;
+    font-size:13.5px;
+    margin-bottom:0.3rem;
+  }
+  .bar-name{ font-weight:600; color:var(--ink); }
+  .bar-amount{ font-weight:700; color:var(--maroon-deep); font-variant-numeric:tabular-nums; }
+  .bar-track{
+    height:8px;
+    background:var(--jade-light);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    background:var(--jade);
+    border-radius:99px;
+  }
+  .bar-item.category .bar-fill{ background:var(--gold); }
+  .bar-item.category .bar-track{ background:var(--gold-light); }
+
+  .empty-note{
+    font-size:13.5px;
+    color:var(--taupe);
+    padding:0.5rem 0.1rem;
+  }
+
+  /* ---------- Ledger list ---------- */
+  .ledger-filters{
+    display:flex;
+    gap:0.5rem;
+    margin-bottom:0.75rem;
+  }
+  .ledger-filters select{
+    flex:1;
+    font-family:'Manrope',sans-serif;
+    font-size:13px;
+    padding:0.5rem 0.6rem;
+    border-radius:9px;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--ink);
+  }
+  .day-group{ margin-bottom:1rem; }
+  .day-group:last-child{ margin-bottom:0; }
+  .day-label{
+    font-size:12px;
+    font-weight:700;
+    color:var(--taupe);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin:0 0 0.4rem 0.1rem;
+  }
+  .txn{
+    display:flex;
+    align-items:center;
+    gap:0.7rem;
+    background:var(--paper);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:0.75rem 0.85rem;
+    margin-bottom:0.55rem;
+  }
+  .txn-dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--gold);
+    flex:0 0 auto;
+  }
+  .txn-main{ flex:1; min-width:0; }
+  .txn-title{
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--ink);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .txn-sub{
+    font-size:12px;
+    color:var(--taupe);
+    margin-top:1px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .txn-amount{
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--maroon-deep);
+    font-variant-numeric:tabular-nums;
+    flex:0 0 auto;
+    margin-left:0.3rem;
+  }
+  .txn-actions{
+    display:flex;
+    gap:0.3rem;
+    flex:0 0 auto;
+    margin-left:0.4rem;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:0.25rem;
+    color:var(--taupe);
+    font-size:15px;
+    line-height:1;
+  }
+  .icon-btn:active{ color:var(--maroon); }
+  .icon-btn.danger:active{ color:var(--danger); }
+
+  /* ---------- Footer / reset ---------- */
+  .footer{
+    margin:2rem 1.25rem 0;
+    text-align:center;
+  }
+  .reset-link{
+    background:none;
+    border:none;
+    color:var(--taupe);
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:'Manrope',sans-serif;
+  }
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--maroon-deep);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    padding:0.6rem 1.1rem;
+    border-radius:99px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+    z-index:50;
+    white-space:nowrap;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  .hidden{ display:none !important; }
+
+  select.custom-new{ display:none; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="header">
+    <svg class="motif" viewBox="0 0 400 14" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 7 Q 10 0, 20 7 T 40 7 T 60 7 T 80 7 T 100 7 T 120 7 T 140 7 T 160 7 T 180 7 T 200 7 T 220 7 T 240 7 T 260 7 T 280 7 T 300 7 T 320 7 T 340 7 T 360 7 T 380 7 T 400 7"
+        fill="none" stroke="#C68A2E" stroke-width="1.4"/>
+    </svg>
+    <p class="eyebrow">Your wedding, tallied</p>
+    <h1 class="title">Shaadi Khata</h1>
+    <p class="subtitle">One ledger for every function, from haldi to vidaai.</p>
+  </div>
+
+  <div class="summary">
+    <div class="summary-row">
+      <div>
+        <p class="summary-label">Total spent</p>
+        <div class="summary-amount" id="totalSpent">₹0</div>
+      </div>
+      <div class="summary-count" id="entryCount">0 entries</div>
+    </div>
+    <div class="budget-wrap" id="budgetWrap"></div>
+  </div>
+
+  <div class="section" id="addSection">
+    <button class="add-toggle" id="addToggleBtn" type="button">
+      <span class="plus">+</span> Add an expense
+    </button>
+
+    <div class="card hidden" id="addCard">
+      <div class="field">
+        <label for="f-amount">Amount</label>
+        <div class="amount-field">
+          <span class="rupee">₹</span>
+          <input type="number" id="f-amount" inputmode="decimal" placeholder="25000" min="0" step="1">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="f-event">Event</label>
+          <select id="f-event"></select>
+        </div>
+        <div class="field">
+          <label for="f-category">Category</label>
+          <select id="f-category"></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="f-note">Note</label>
+          <input type="text" id="f-note" placeholder="e.g. Lehenga blouse stitching">
+        </div>
+        <div class="field">
+          <label for="f-date">Date</label>
+          <input type="date" id="f-date">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cancelBtn" type="button">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn" type="button">Save expense</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">By event</p>
+    </div>
+    <div class="pill-scroll" id="eventPills"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Spending by event</p>
+    </div>
+    <div class="card">
+      <div class="bar-list" id="eventBars"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Spending by category</p>
+    </div>
+    <div class="card">
+      <div class="bar-list" id="categoryBars"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Ledger</p>
+    </div>
+    <div class="ledger-filters">
+      <select id="filterEvent"><option value="">All events</option></select>
+      <select id="filterCategory"><option value="">All categories</option></select>
+    </div>
+    <div id="ledgerList"></div>
+  </div>
+
+  <div class="footer">
+    <button class="reset-link" id="resetBtn" type="button">Clear all data</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var DEFAULT_EVENTS = ["Engagement","Haldi","Mehndi","Sangeet","Wedding","Reception"];
+  var DEFAULT_CATEGORIES = ["Clothing & attire","Jewelry","Venue","Catering","Decor & flowers","Photography & video","Makeup & hair","Invitations","Gifts & favors","Transport","Entertainment","Other"];
+
+  var state = {
+    expenses: [],
+    events: DEFAULT_EVENTS.slice(),
+    categories: DEFAULT_CATEGORIES.slice(),
+    budget: null,
+    eventFilterPill: "",
+    ledgerEventFilter: "",
+    ledgerCategoryFilter: "",
+    editingId: null,
+    loaded: false
+  };
+
+  function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function fmt(n){
+    n = Math.round(Number(n)||0);
+    return '₹' + n.toLocaleString('en-IN');
+  }
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    return d.getFullYear()+'-'+m+'-'+day;
+  }
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._h);
+    showToast._h = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+  }
+
+  // ---------- storage (local to this device/browser) ----------
+  var STORAGE_KEY = 'shaadi-khata-data';
+  async function loadData(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        state.expenses = parsed.expenses || [];
+        state.events = parsed.events || DEFAULT_EVENTS.slice();
+        state.categories = parsed.categories || DEFAULT_CATEGORIES.slice();
+        state.budget = (typeof parsed.budget === 'number') ? parsed.budget : null;
+      }
+    }catch(e){
+      // no existing data yet, or storage unavailable - start fresh
+    }
+    state.loaded = true;
+  }
+
+  var saveTimer = null;
+  function saveData(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          expenses: state.expenses,
+          events: state.events,
+          categories: state.categories,
+          budget: state.budget
+        }));
+      }catch(e){
+        showToast("Couldn't save — storage full or blocked");
+      }
+    }, 150);
+  }
+
+  // ---------- rendering ----------
+  function populateSelect(sel, options, includeAddNew){
+    sel.innerHTML = '';
+    options.forEach(function(o){
+      var opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      sel.appendChild(opt);
+    });
+    if(includeAddNew){
+      var opt = document.createElement('option');
+      opt.value = '__new__'; opt.textContent = '+ Add new…';
+      sel.appendChild(opt);
+    }
+  }
+
+  function renderFormSelects(){
+    populateSelect(document.getElementById('f-event'), state.events, true);
+    populateSelect(document.getElementById('f-category'), state.categories, true);
+  }
+
+  function renderFilterSelects(){
+    var fe = document.getElementById('filterEvent');
+    var fc = document.getElementById('filterCategory');
+    var curE = fe.value, curC = fc.value;
+    fe.innerHTML = '<option value="">All events</option>';
+    state.events.forEach(function(o){
+      var opt = document.createElement('option'); opt.value = o; opt.textContent = o;
+      fe.appendChild(opt);
+    });
+    fc.innerHTML = '<option value="">All categories</option>';
+    state.categories.forEach(function(o){
+      var opt = document.createElement('option'); opt.value = o; opt.textContent = o;
+      fc.appendChild(opt);
+    });
+    fe.value = state.events.indexOf(curE) >= 0 ? curE : "";
+    fc.value = state.categories.indexOf(curC) >= 0 ? curC : "";
+  }
+
+  function renderSummary(){
+    var total = state.expenses.reduce(function(s,e){ return s + Number(e.amount||0); }, 0);
+    document.getElementById('totalSpent').textContent = fmt(total);
+    document.getElementById('entryCount').textContent = state.expenses.length + (state.expenses.length===1?' entry':' entries');
+
+    var wrap = document.getElementById('budgetWrap');
+    if(state.budget && state.budget > 0){
+      var pct = Math.min(100, Math.round((total/state.budget)*100));
+      var over = total > state.budget;
+      wrap.innerHTML =
+        '<div class="budget-track"><div class="budget-fill'+(over?' over':'')+'" style="width:'+pct+'%"></div></div>'+
+        '<div class="budget-text"><span>'+pct+'% of '+fmt(state.budget)+' budget</span>'+
+        '<button class="set-budget-btn" id="editBudgetBtn" type="button">edit</button></div>';
+    } else {
+      wrap.innerHTML = '<button class="set-budget-btn" id="editBudgetBtn" type="button">+ set a total budget</button>';
+    }
+    document.getElementById('editBudgetBtn').addEventListener('click', function(){
+      var val = prompt('Total wedding budget (₹)', state.budget || '');
+      if(val === null) return;
+      var num = parseFloat(val);
+      state.budget = isNaN(num) || num <= 0 ? null : num;
+      saveData();
+      renderSummary();
+    });
+  }
+
+  function renderEventPills(){
+    var wrap = document.getElementById('eventPills');
+    wrap.innerHTML = '';
+    var allPill = document.createElement('button');
+    allPill.className = 'pill' + (state.eventFilterPill === '' ? ' active' : '');
+    allPill.textContent = 'All';
+    allPill.type = 'button';
+    allPill.addEventListener('click', function(){ state.eventFilterPill = ''; render(); });
+    wrap.appendChild(allPill);
+
+    state.events.forEach(function(ev){
+      var p = document.createElement('button');
+      p.className = 'pill' + (state.eventFilterPill === ev ? ' active' : '');
+      p.textContent = ev;
+      p.type = 'button';
+      p.addEventListener('click', function(){
+        state.eventFilterPill = (state.eventFilterPill === ev) ? '' : ev;
+        render();
+      });
+      wrap.appendChild(p);
+    });
+  }
+
+  function filteredExpenses(){
+    return state.expenses.filter(function(e){
+      if(state.eventFilterPill && e.event !== state.eventFilterPill) return false;
+      return true;
+    });
+  }
+
+  function renderBars(){
+    var list = filteredExpenses();
+    var evTotals = {}, catTotals = {};
+    list.forEach(function(e){
+      evTotals[e.event] = (evTotals[e.event]||0) + Number(e.amount||0);
+      catTotals[e.category] = (catTotals[e.category]||0) + Number(e.amount||0);
+    });
+    var grand = list.reduce(function(s,e){ return s+Number(e.amount||0); }, 0);
+
+    function buildBars(totals, cls, onClick){
+      var entries = Object.keys(totals).map(function(k){ return [k, totals[k]]; });
+      entries.sort(function(a,b){ return b[1]-a[1]; });
+      if(entries.length === 0){
+        return '<p class="empty-note">Nothing recorded yet.</p>';
+      }
+      var html = '';
+      entries.forEach(function(pair){
+        var pct = grand > 0 ? Math.round((pair[1]/grand)*100) : 0;
+        html += '<div class="bar-item '+cls+'" data-key="'+pair[0].replace(/"/g,'&quot;')+'">'+
+          '<div class="bar-top"><span class="bar-name">'+pair[0]+'</span><span class="bar-amount">'+fmt(pair[1])+'</span></div>'+
+          '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'+
+        '</div>';
+      });
+      return html;
+    }
+
+    document.getElementById('eventBars').innerHTML = buildBars(evTotals, 'event');
+    document.getElementById('categoryBars').innerHTML = buildBars(catTotals, 'category');
+
+    document.querySelectorAll('#eventBars .bar-item').forEach(function(el){
+      el.addEventListener('click', function(){
+        var k = el.getAttribute('data-key');
+        state.eventFilterPill = (state.eventFilterPill === k) ? '' : k;
+        render();
+      });
+    });
+    document.querySelectorAll('#categoryBars .bar-item').forEach(function(el){
+      el.addEventListener('click', function(){
+        var k = el.getAttribute('data-key');
+        document.getElementById('filterCategory').value = k;
+        state.ledgerCategoryFilter = k;
+        renderLedger();
+      });
+    });
+  }
+
+  function renderLedger(){
+    var list = state.expenses.filter(function(e){
+      if(state.ledgerEventFilter && e.event !== state.ledgerEventFilter) return false;
+      if(state.ledgerCategoryFilter && e.category !== state.ledgerCategoryFilter) return false;
+      return true;
+    });
+    list.sort(function(a,b){ return (b.date||'').localeCompare(a.date||'') || b.id.localeCompare(a.id); });
+
+    var container = document.getElementById('ledgerList');
+    if(list.length === 0){
+      container.innerHTML = '<p class="empty-note">No expenses match this filter yet.</p>';
+      return;
+    }
+
+    var groups = {};
+    var order = [];
+    list.forEach(function(e){
+      var key = e.date || 'No date';
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(e);
+    });
+
+    var html = '';
+    order.forEach(function(dateKey){
+      var label = dateKey;
+      if(dateKey !== 'No date'){
+        var d = new Date(dateKey + 'T00:00:00');
+        if(!isNaN(d)){
+          label = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+        }
+      }
+      html += '<div class="day-group"><p class="day-label">'+label+'</p>';
+      groups[dateKey].forEach(function(e){
+        html += '<div class="txn" data-id="'+e.id+'">'+
+          '<div class="txn-dot"></div>'+
+          '<div class="txn-main">'+
+            '<div class="txn-title">'+(e.note ? e.note : e.category)+'</div>'+
+            '<div class="txn-sub">'+e.event+' · '+e.category+'</div>'+
+          '</div>'+
+          '<div class="txn-amount">'+fmt(e.amount)+'</div>'+
+          '<div class="txn-actions">'+
+            '<button class="icon-btn edit-btn" type="button" title="Edit" aria-label="Edit">✎</button>'+
+            '<button class="icon-btn danger del-btn" type="button" title="Delete" aria-label="Delete">✕</button>'+
+          '</div>'+
+        '</div>';
+      });
+      html += '</div>';
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll('.edit-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.closest('.txn').getAttribute('data-id');
+        startEdit(id);
+      });
+    });
+    container.querySelectorAll('.del-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.closest('.txn').getAttribute('data-id');
+        if(confirm('Delete this expense?')){
+          state.expenses = state.expenses.filter(function(e){ return e.id !== id; });
+          saveData();
+          render();
+          showToast('Expense deleted');
+        }
+      });
+    });
+  }
+
+  function render(){
+    renderSummary();
+    renderEventPills();
+    renderBars();
+    renderFilterSelects();
+    renderLedger();
+  }
+
+  // ---------- add / edit form ----------
+  function openForm(){
+    document.getElementById('addCard').classList.remove('hidden');
+    document.getElementById('addToggleBtn').classList.add('hidden');
+    document.getElementById('f-date').value = todayStr();
+  }
+  function closeForm(){
+    document.getElementById('addCard').classList.add('hidden');
+    document.getElementById('addToggleBtn').classList.remove('hidden');
+    document.getElementById('f-amount').value = '';
+    document.getElementById('f-note').value = '';
+    state.editingId = null;
+    document.getElementById('saveBtn').textContent = 'Save expense';
+  }
+
+  function startEdit(id){
+    var e = state.expenses.find(function(x){ return x.id === id; });
+    if(!e) return;
+    state.editingId = id;
+    renderFormSelects();
+    openForm();
+    document.getElementById('f-amount').value = e.amount;
+    document.getElementById('f-event').value = e.event;
+    document.getElementById('f-category').value = e.category;
+    document.getElementById('f-note').value = e.note || '';
+    document.getElementById('f-date').value = e.date || todayStr();
+    document.getElementById('saveBtn').textContent = 'Update expense';
+    document.getElementById('addCard').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function handleSelectNew(selectEl, listName){
+    selectEl.addEventListener('change', function(){
+      if(selectEl.value === '__new__'){
+        var name = prompt('New ' + (listName==='events'?'event name':'category name'));
+        if(name && name.trim()){
+          name = name.trim();
+          if(listName === 'events' && state.events.indexOf(name) === -1){
+            state.events.push(name);
+          }
+          if(listName === 'categories' && state.categories.indexOf(name) === -1){
+            state.categories.push(name);
+          }
+          saveData();
+          renderFormSelects();
+          selectEl.value = name;
+          renderEventPills();
+        } else {
+          selectEl.value = selectEl.options[0] ? selectEl.options[0].value : '';
+        }
+      }
+    });
+  }
+
+  function saveExpense(){
+    var amount = parseFloat(document.getElementById('f-amount').value);
+    var event = document.getElementById('f-event').value;
+    var category = document.getElementById('f-category').value;
+    var note = document.getElementById('f-note').value.trim();
+    var date = document.getElementById('f-date').value || todayStr();
+
+    if(!amount || amount <= 0){
+      showToast('Enter a valid amount');
+      return;
+    }
+    if(event === '__new__' || category === '__new__'){
+      showToast('Finish adding the new option first');
+      return;
+    }
+
+    if(state.editingId){
+      var e = state.expenses.find(function(x){ return x.id === state.editingId; });
+      e.amount = amount; e.event = event; e.category = category; e.note = note; e.date = date;
+      showToast('Expense updated');
+    } else {
+      state.expenses.push({ id: uid(), amount: amount, event: event, category: category, note: note, date: date });
+      showToast('Expense added');
+    }
+    saveData();
+    closeForm();
+    render();
+  }
+
+  // ---------- init ----------
+  async function init(){
+    document.getElementById('addToggleBtn').addEventListener('click', function(){
+      renderFormSelects();
+      openForm();
+    });
+    document.getElementById('cancelBtn').addEventListener('click', closeForm);
+    document.getElementById('saveBtn').addEventListener('click', saveExpense);
+    handleSelectNew(document.getElementById('f-event'), 'events');
+    handleSelectNew(document.getElementById('f-category'), 'categories');
+
+    document.getElementById('filterEvent').addEventListener('change', function(){
+      state.ledgerEventFilter = this.value; renderLedger();
+    });
+    document.getElementById('filterCategory').addEventListener('change', function(){
+      state.ledgerCategoryFilter = this.value; renderLedger();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', async function(){
+      if(confirm('This will permanently delete all your wedding expense data. Continue?')){
+        state.expenses = [];
+        state.events = DEFAULT_EVENTS.slice();
+        state.categories = DEFAULT_CATEGORIES.slice();
+        state.budget = null;
+        state.eventFilterPill = ''; state.ledgerEventFilter=''; state.ledgerCategoryFilter='';
+        saveData();
+        render();
+        showToast('All data cleared');
+      }
+    });
+
+    document.getElementById('ledgerList').innerHTML = '<p class="empty-note">Loading your ledger…</p>';
+    await loadData();
+    render();
+  }
+
+  init();
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>
